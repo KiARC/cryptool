@@ -1,0 +1,43 @@
+name: 'release'
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  pre-release:
+    # Builds for 3 most common targets on pushes to main and then publishes a release
+    name: 'Semver Release Hook'
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4.1.2
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v5.0.0
+        with:
+          go-version-file: go.mod
+
+      - name: Build Linux amd64
+        run: GOOS=linux GOARCH=amd64 go build -o cryptool_linux
+
+      - name: Build Windows amd64
+        run: GOOS=windows GOARCH=amd64 go build -o cryptool_win.exe
+
+      - name: Build Darwin arm64
+        run: GOOS=darwin GOARCH=arm64 go build -o cryptool_darwin
+
+      - name: Generate Pre-Release
+        uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: '${{ secrets.GITHUB_TOKEN }}'
+          prerelease: false
+          files: |
+            cryptool_linux
+            cryptool_win.exe
+            cryptool_darwin
