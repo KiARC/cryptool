@@ -1,0 +1,5 @@
+*.exe
+*.exe~
+
+# Folder I use for manual testing
+testing/
